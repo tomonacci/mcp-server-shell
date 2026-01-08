@@ -32,6 +32,7 @@ function main() {
       `--unit=${MAIN_UNIT}`,
       "-p", `RuntimeDirectory=mcp-server-shell-${RUN_ID}`,
       "-p", `Environment=RUN_ID=${RUN_ID}`,
+      ...(process.env.BASH_ENV ? ["-p", `Environment=BASH_ENV=${process.env.BASH_ENV}`] : []),
       "--",
       ...process.argv,
     ];
