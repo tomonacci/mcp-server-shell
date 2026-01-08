@@ -140,6 +140,7 @@ async function startServer() {
         "-p", `StandardOutput=append:${stdout}`,
         "-p", `StandardError=append:${stderr}`,
         "-p", `Environment=RESULT_PATH=${result}`,
+        ...(process.env.BASH_ENV ? ["-p", `Environment=BASH_ENV=${process.env.BASH_ENV}`] : []),
         "-p", `BindsTo=${MAIN_UNIT}.service`,
         "-p", `After=${MAIN_UNIT}.service`,
         "-p", 'ExecStopPost=/bin/sh -c "jq --arg code \\"$EXIT_CODE\\" --arg status \\"$EXIT_STATUS\\" -nc \'{ code: $code, status: $status }\' >\\"$RESULT_PATH\\" 2>&1"',
