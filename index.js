@@ -118,15 +118,16 @@ async function startServer() {
   server.registerTool(
     "run_shell",
     {
-      description: "Run script as shell script via systemd-run. Returns as soon as the script finishes or after 3s.",
+      description: "Run script as shell script via systemd-run. Returns as soon as the script finishes or after the specified timeout.",
       inputSchema: {
         script: z.string().describe("The shell script to execute"),
         cwd: z.string().optional().describe("The current working directory of the shell"),
-        background: z.boolean().optional().describe("If true, returns immediately without waiting for completion for 3 seconds. Useful to eliminate unnecessary delays when you are running a background process that are not expected to finish within a couple of seconds"),
+        background: z.boolean().optional().describe("If true, returns immediately without waiting for completion. Useful to eliminate unnecessary delays when you are running a background process that are not expected to finish"),
+        timeout: z.number().default(3).describe("The number of seconds to wait for completion before backgrounding the script and returning. Defaults to 3 seconds"),
       },
       outputSchema: ShellResultSchema
     },
-    async ({ script, cwd, background }) => {
+    async ({ script, cwd, background, timeout }) => {
       const shellId = Math.random().toString(36).substring(2, 10);
       const unit = `${MAIN_UNIT}-${shellId}`;
       const { stdout, stderr, result } = getLogPaths(shellId);
@@ -205,7 +206,7 @@ async function startServer() {
       if (!background) {
         await Promise.race([
           completionPromise,
-          new Promise((resolve) => setTimeout(() => resolve(), 3000))
+          new Promise((resolve) => setTimeout(() => resolve(), timeout * 1000))
         ]);
       }
 
